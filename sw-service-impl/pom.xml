@@ -8,25 +8,26 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<groupId>com.sw.test</groupId>
-	<artifactId>sw-ia-webflux</artifactId>
+	<artifactId>sw-service-impl</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>sw-test-webflux</name>
-	<description> Weather service of ZZ, webflux interface</description>
+	<name>sw-service-impl</name>
+	<description> Card game service of sw, implement</description>
 
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>com.sw.test</groupId>
-			<artifactId>sw-service-api</artifactId>
+			<artifactId>sw-configuration</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.sw.test</groupId>
-			<artifactId>sw-service-impl</artifactId>
+			<artifactId>sw-service-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
@@ -56,19 +57,6 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-websocket</artifactId>
-		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>

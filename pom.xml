@@ -21,6 +21,9 @@
 
 	<modules>
 		<module>sw-ia-webflux</module>
+		<module>sw-service-api</module>
+		<module>sw-service-impl</module>
+		<module>sw-configuration</module>
 	</modules>
 
 </project>

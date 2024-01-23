@@ -1,38 +1,39 @@
 <template>
   <div class="content" style="padding: 15px;">
     <div class="card-repo">
-      <h2>{{title}}</h2>
+      <div class="button-div">
+        <div class="button" @click="shuffleFunc(deck)">Shuffle</div>
+        <div class="button" @click="distributeFunc(shuffleList)">distribute</div>
+        <span class="winner">Winner:{{winner}}</span>
+      </div>
+      <h2>Deck</h2>
       <div>
-        <div  class="card"  v-for="(item, index) in cardRepo" :key="index">
+        <div  class="card"  v-for="(item, index) in deck" :key="index">
           {{ item + ' ' }}
         </div>
       </div>
-      <div class="button-div">
-        <div class="button" @click="shuffleFunc(cardRepo)">Shuffle</div>
-        <div class="button" @click="dealFunc(shuffleList)">distribute</div>
-      </div>
     </div>
     <div class="player-a">
-       <h2>playerA</h2>
-       <div  class="card-player"  v-for="(item, index) in playerA" :key="index">
+       <h2>{{playerName}}</h2>
+       <div  class="card"  v-for="(item, index) in playerA" :key="index">
           {{ item + ' ' }}
         </div>
     </div>
     <div class="player-b">
-       <h2>playerB</h2>
-       <div  class="card-player"  v-for="(item, index) in playerB" :key="index">
+       <h2>{{playerName2}}</h2>
+       <div  class="card"  v-for="(item, index) in playerB" :key="index">
           {{ item + ' ' }}
         </div>
     </div>
     <div class="player-c">
-       <h2>playerC</h2>
-       <div  class="card-player"  v-for="(item, index) in playerC" :key="index">
+       <h2>{{playerName3}}</h2>
+       <div  class="card"  v-for="(item, index) in playerC" :key="index">
           {{ item + ' ' }}
         </div>
     </div>
     <div class="player-d">
-       <h2>playerD</h2>
-       <div  class="card-player"  v-for="(item, index) in playerD" :key="index">
+       <h2>{{playerName4}}</h2>
+       <div  class="card"  v-for="(item, index) in playerD" :key="index">
           {{ item + ' ' }}
         </div>
     </div>
@@ -42,66 +43,89 @@
 export default {
   data() {
     return {
-      title: 'Deck',
-      cardRepo: ['2@','2#','2^','2*',
-      '3@','3#','3^','3*',
-       '4@','4#','4^','4*','5@',
-          '5#',
-          '5^',
-          '5*',
-          '6@',
-          '6#',
-          '6^',
-          '6*',
-          '7@',
-          '7#',
-          '7^',
-          '7*',
-          '8@',
-          '8#',
-          '8^',
-          '8*',
-          '9@',
-          '9#',
-          '9^',
-          '9*',
-          '10@',
-          '10#',
-          '10^',
-          '10*',
-          'J@',
-          'J#',
-          'J^',
-          'J*',
-          'Q@',
-          'Q#',
-          'Q^',
-          'Q*',
-          'K@',
-          'K#',
-          'K^',
-          'K*',
-          'A@',
-          'A#',
-          'A^',
-          'A*'
-        ],
-        playerA: ["2@","2#","2^","2*","3@","4#","5^","6*"],
-        playerB: ["2@","2#","2^","2*","3@","4#","5^","6*"],
-        playerC: ["2@","2#","2^","2*","3@","4#","5^","6*"],
-        playerD: ["2@","2#","2^","2*","3@","4#","5^","6*"],
-        winner: 'playerA'
+      roomId: "",
+      playerName: "",
+      playerName2: "",
+      playerName3: "",
+      playerName4: "",
+      deck: [],
+      playerA: [],
+      playerB: [],
+      playerC: [],
+      playerD: [],
+      winner: ''
     };
   },
+  mounted () {
+
+    this.playerName = localStorage.getItem('playerName');
+    this.roomId = localStorage.getItem('roomId');
+    
+    if (this.playerName.trim() === '') {
+      this.playerName = "Anonymous"
+    }
+
+    console.log(this.playerName)
+    console.log(this.roomId)
+    
+    this.init()
+  },
   methods:{
+
     shuffleFunc(){
+      this.send({"eventId":"event_shuffle_cards","playerName":this.playerName, "roomId":this.roomId});
+    },
+
+    distributeFunc(){
+      this.send({"eventId":"event_distribute_cards","playerName":this.playerName, "roomId":this.roomId});
+    },
+    
+    init: function () {
+        if(typeof(WebSocket) === "undefined"){
+            alert("Your browser does not support sockets")
+        }else{
+            this.socket = new WebSocket("ws://localhost:9090/event-emitter")
+            this.socket.onopen = this.open
+            this.socket.onerror = this.error
+            this.socket.onmessage = this.message
+        }
+    },
+    send: function (params) {
+        this.socket.send(JSON.stringify(params))
+    },
+    open: function () {
+        console.log("Socket connection successful!")
+        this.send({"eventId":"event_create_room","playerName":this.playerName, "roomId":this.roomId});
+    },
+    error: function () {
+        console.log("connection error!")
+    },
+    message: function (message) {
+        console.log("get a message")
+        console.log(message.data)
+        var room = JSON.parse(message.data)
+        this.roomId = room.id
+        this.roomId = room.id
+        this.deck = room.deck
+        this.playerA = room.players[0].cards
+        this.playerB = room.players[1].cards
+        this.playerC = room.players[2].cards
+        this.playerD = room.players[3].cards
+        this.winner = room.winner
+        this.playerName = room.players[0].name
+        this.playerName2 = room.players[1].name
+        this.playerName3 = room.players[2].name
+        this.playerName4 = room.players[3].name
+    },
+    close: function () {
+        console.log("The socket has been closed.")
     }
   }
 }
 
 </script>
 
-<style>
+<style scoped>
 .content {
   display: flex;
   justify-content:space-around;
@@ -112,9 +136,10 @@ export default {
   padding: 10px;
 }
 .player-a , .player-b , .player-c , .player-d{
-  width:10%;
+  width: 120px;
   height:100%;
   padding: 10px;
+  margin-top: 58px;
 }
 .button-div{
   display: flex;
@@ -131,13 +156,6 @@ export default {
   margin: 4px;
   line-height: 80px;
 }
-.card-player{
-  width:50px;
-  height:80px;
-  border: 1px solid black;
-  line-height: 80px;
-  margin:4px auto;
-}
 .button {
   display: inline-block;
   padding: 10px 20px;
@@ -146,6 +164,10 @@ export default {
   color: #fff;
   font-size: 16px;
   cursor: pointer;
+}
+.winner{
+  color: #007bff;
+  font-size: 18px;
 }
 </style>
 
